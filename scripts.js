@@ -1,3 +1,14 @@
+buttons = document.querySelectorAll(".choice");
+restartButton = document.querySelector(".restart")
+playerScore = document.querySelector(".player-score");
+computerScore = document.querySelector(".computer-score");
+statusText = document.querySelector(".status-text");
+statusRounds = document.querySelector(".status-rounds");
+resultWinner = document.querySelector(".result-winner");
+
+let playerWins = 0;
+let computerWins = 0;
+
 function computerPlay() {
     let options = ["Rock", "Paper", "Scissors"];
     let random = Math.floor(Math.random() * 3);
@@ -31,32 +42,46 @@ function comparePlayer(playerChoice, computerChoice) {
     }
 }
 
-function game() {
-    playerWins = 0;
-    computerWins = 0;
-
-    for (let i = 0; i < 5; i++) {
-        let playerChoice = prompt("Rock, Paper, or Scissors?");
-        let computerChoice = computerPlay();
-        let result = comparePlayer(playerChoice, computerChoice);
-        console.log(result);
-        
-        if (result.includes("win")) {
-            playerWins++;
-        } else if (result.includes("lose")) {
-            computerWins++;
-        } else {
-            console.log("It's a tie! Let's try again");
-            i--;
-        }
-    }
-
-    if (playerWins > computerWins) {
-        console.log(`You won ${playerWins} times and the computer won ${computerWins} times. You are the winner!`);
+function game(playerChoice) {
+    let computerChoice = computerPlay();
+    let result = comparePlayer(playerChoice, computerChoice);
+    
+    if (result.includes("win")) {
+        playerWins++;
+        playerScore.textContent = playerWins;
+        statusText.innerText = "You win this round!";
+    } else if (result.includes("lose")) {
+        computerWins++;
+        computerScore.textContent = computerWins;
+        statusText.innerText = "You lost this round!";
     } else {
-        console.log(`You won ${playerWins} times and the computer won ${computerWins} times. The computer is the winner!`);
+        statusText.innerText = "It's a tie! Let's try again";
     }
 
+    if (playerWins >= 5) {
+        statusText.innerText = "You won the game!";
+        resetGame();
+    } else if (computerWins >= 5) {
+        statusText.innerText = "You lost the game!";
+        resetGame();
+    }
+
+    statusRounds.textContent = "Rounds Played: " + (playerWins + computerWins);
 }
 
-game();
+function resetGame() {
+    buttons.forEach((button) => {
+        button.classList.add("hidden");
+        restartButton.classList.remove("hidden");
+    })
+}
+
+buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+        game(button.id);
+    });
+});
+
+restartButton.addEventListener("click", () => {
+    window.location.reload();
+});
