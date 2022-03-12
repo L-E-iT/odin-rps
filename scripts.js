@@ -1,3 +1,15 @@
+let buttons = document.querySelectorAll(".choice");
+let restartButton = document.querySelector(".restart")
+let playerScore = document.querySelector(".player-score");
+let computerScore = document.querySelector(".computer-score");
+let statusText = document.querySelector(".status-text");
+let statusRounds = document.querySelector(".status-rounds");
+let resultWinner = document.querySelector(".result-winner");
+let roundResults = document.querySelector(".round-results");
+
+let playerWins = 0;
+let computerWins = 0;
+
 function computerPlay() {
     let options = ["Rock", "Paper", "Scissors"];
     let random = Math.floor(Math.random() * 3);
@@ -31,32 +43,103 @@ function comparePlayer(playerChoice, computerChoice) {
     }
 }
 
-function game() {
-    playerWins = 0;
-    computerWins = 0;
+function game(playerChoice) {
+    let computerChoice = computerPlay();
+    let result = comparePlayer(playerChoice, computerChoice);
 
-    for (let i = 0; i < 5; i++) {
-        let playerChoice = prompt("Rock, Paper, or Scissors?");
-        let computerChoice = computerPlay();
-        let result = comparePlayer(playerChoice, computerChoice);
-        console.log(result);
-        
-        if (result.includes("win")) {
-            playerWins++;
-        } else if (result.includes("lose")) {
-            computerWins++;
-        } else {
-            console.log("It's a tie! Let's try again");
-            i--;
-        }
-    }
-
-    if (playerWins > computerWins) {
-        console.log(`You won ${playerWins} times and the computer won ${computerWins} times. You are the winner!`);
+    removeAllChildElements(roundResults);
+    generateRoundResult(playerChoice, computerChoice, roundResults);
+    
+    if (result.includes("win")) {
+        playerWins++;
+        playerScore.textContent = playerWins;
+        statusText.innerText = "You win this round!";
+    } else if (result.includes("lose")) {
+        computerWins++;
+        computerScore.textContent = computerWins;
+        statusText.innerText = "You lost this round!";
     } else {
-        console.log(`You won ${playerWins} times and the computer won ${computerWins} times. The computer is the winner!`);
+        statusText.innerText = "It's a tie! Let's try again";
     }
 
+    if (playerWins >= 5) {
+        statusText.innerText = "You won the game!";
+        resetGame();
+    } else if (computerWins >= 5) {
+        statusText.innerText = "You lost the game!";
+        resetGame();
+    }
+
+    statusRounds.textContent = "Rounds Played: " + (playerWins + computerWins);
 }
 
-game();
+function resetGame() {
+    buttons.forEach((button) => {
+        button.classList.add("hidden");
+        restartButton.classList.remove("hidden");
+    })
+}
+
+function removeAllChildElements(element) {
+    while (element.firstChild) {
+        element.removeChild(element.firstChild);
+    }
+}
+
+function generateRoundResult(playerChoice, computerChoice, element) {
+    let playerImage = document.createElement("img");
+    let computerImage = document.createElement("img");
+    let playerText = document.createElement("p");
+    let computerText = document.createElement("p");
+    let playerDiv = document.createElement("div");
+    let computerDiv = document.createElement("div");
+    let vsText = document.createElement("p");
+
+    playerImage.src = getImage(playerChoice.toLowerCase());
+    computerImage.src = getImage(computerChoice.toLowerCase());
+    playerText.textContent = "You chose: ";
+    computerText.textContent = "Computer chose: ";
+
+    computerDiv.classList.add("col");
+    playerDiv.classList.add("col");
+    element.classList.add("row");
+
+    element.style.justifyContent = "center";
+    element.style.gap = "32px";
+    element.style.margin="32px";
+    playerImage.style.width = "100px";
+    computerImage.style.width = "100px";
+    vsText.innerHTML = "VS";
+
+    element.appendChild(playerDiv);
+    element.appendChild(vsText);
+    element.appendChild(computerDiv);
+    playerDiv.appendChild(playerText);
+    computerDiv.appendChild(computerText);
+    playerDiv.appendChild(playerImage);
+    computerDiv.appendChild(computerImage);
+}
+
+function getImage(choice) {
+    let scissorsImage = "./images/scissors.png";
+    let rockImage = "./images/rock.png";
+    let paperImage = "./images/paper.png";
+
+    if (choice == "rock") {
+        return rockImage;
+    } else if (choice == "paper") {
+        return paperImage;
+    } else {
+        return scissorsImage;
+    }
+}
+
+buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+        game(button.id);
+    });
+});
+
+restartButton.addEventListener("click", () => {
+    window.location.reload();
+});
